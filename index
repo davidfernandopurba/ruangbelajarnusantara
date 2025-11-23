@@ -1,1 +1,370 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EkoKelas 12 - Platform Pembelajaran Minimalis</title>
+    <!-- Tailwind CSS (Aesthetics and Responsiveness) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons Library -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #fcfcfd; color: #1f2937; }
+        .nav-link.active { background-color: #4f46e5; color: white !important; }
+        .nav-link { padding: 8px 16px; border-radius: 9999px; transition: all 0.2s; }
+        .nav-link:hover { background-color: rgba(79, 70, 229, 0.1); }
+        /* Style untuk konten yang ditampilkan di modal */
+        /* Menggunakan pre-wrap agar baris baru (\n) di data terlihat sebagai paragraf baru */
+        .modal-content-text { white-space: pre-wrap; line-height: 1.6; font-size: 1rem; } 
+    </style>
+</head>
+<body>
 
+    <!-- HEADER (Navigation Bar) -->
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-16">
+            <span class="text-2xl font-bold text-indigo-700">Eko<span class="text-green-500">Kelas</span>12</span>
+            
+            <!-- Navigasi Desktop -->
+            <nav class="hidden md:flex space-x-2">
+                <button onclick="navigate('mataPelajaran')" class="nav-link text-gray-700" data-page="mataPelajaran">Mata Pelajaran</button>
+                <button onclick="navigate('admin')" class="nav-link text-gray-700" data-page="admin">Pengaturan Admin</button>
+            </nav>
+
+            <!-- Tombol Menu Mobile -->
+            <button id="mobile-menu-button" type="button" class="md:hidden p-2 rounded-md text-gray-500 hover:bg-gray-100 focus:outline-none">
+                <i data-lucide="menu" id="menu-icon" class="h-6 w-6"></i>
+                <i data-lucide="x" id="close-icon" class="h-6 w-6 hidden"></i>
+            </button>
+        </div>
+
+        <!-- Menu Mobile -->
+        <div class="md:hidden hidden bg-white border-t" id="mobile-menu">
+            <button onclick="navigate('mataPelajaran'); toggleMobileMenu()" class="nav-link text-gray-700 block w-full text-left">Mata Pelajaran</button>
+            <button onclick="navigate('admin'); toggleMobileMenu()" class="nav-link text-gray-700 block w-full text-left">Pengaturan Admin</button>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT AREA -->
+    <main id="content-area" class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 min-h-[calc(100vh-150px)]">
+        <!-- Konten akan dimuat di sini oleh JavaScript -->
+    </main>
+
+    <!-- Modal Box (Pengganti alert()) -->
+    <div id="modal-backdrop" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-[100] hidden transition-opacity duration-300"></div>
+    <div id="custom-modal" class="fixed inset-0 flex items-center justify-center z-[101] pointer-events-none opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-xl shadow-2xl p-6 w-full max-w-lg transform scale-95 transition-transform duration-300">
+            <h3 id="modal-title" class="text-xl font-bold mb-3 text-indigo-600">Pesan Sistem</h3>
+            <p id="modal-message" class="text-gray-700 mb-6"></p>
+            <div class="flex justify-end">
+                <button onclick="closeModal()" class="px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // --- DATA MOCK (Konten Lebih Lengkap) ---
+        const MATA_PELAJARAN = "Ekonomi Kelas XII";
+        const CONTENT_DATA = [
+            { 
+                id: 'bab1', 
+                title: 'Bab 1: Akuntansi sebagai Sistem Informasi', 
+                icon: 'book-open-check', 
+                description: 'Mempelajari tujuan, manfaat, persamaan dasar akuntansi, dan siklus akuntansi perusahaan jasa.', 
+                materi: [
+                    { 
+                        id: 'm1_1', 
+                        title: 'A. Definisi, Manfaat, dan Pemakai Informasi Akuntansi', 
+                        type: 'text', 
+                        content: 'Akuntansi sering disebut "bahasa bisnis" karena menyediakan data kuantitatif yang digunakan dalam pengambilan keputusan ekonomi. \n\nManfaat utamanya adalah sebagai dasar pertimbangan investasi dan kredit. Pemakai terbagi menjadi internal (manajemen) dan eksternal (investor, kreditor, pemerintah).' 
+                    },
+                    { 
+                        id: 'm1_2', 
+                        title: 'B. Konsep Persamaan Dasar Akuntansi (PDA)', 
+                        type: 'text', 
+                        content: 'Persamaan Dasar Akuntansi adalah fondasi utama: ASET = LIABILITAS + EKUITAS. \n\nAset adalah sumber daya yang dimiliki. Liabilitas adalah kewajiban kepada pihak luar (utang). Ekuitas adalah hak pemilik (modal). Setiap transaksi harus selalu menjaga keseimbangan persamaan ini.' 
+                    },
+                    { 
+                        id: 'm1_3', 
+                        title: 'C. Kuis Praktik Transaksi Perusahaan Jasa', 
+                        type: 'quiz', 
+                        content: 'Uji pemahaman Anda tentang Persamaan Dasar Akuntansi. Misalnya: "Jika perusahaan membeli peralatan tunai Rp 5.000.000, bagaimana pengaruhnya terhadap PDA?" \n\nPetunjuk: Aset (Peralatan) bertambah dan Aset (Kas) berkurang. Total aset tetap sama, dan persamaan tetap seimbang.' 
+                    }
+                ] 
+            },
+            { 
+                id: 'bab2', 
+                title: 'Bab 2: Konsep Dasar Manajemen', 
+                icon: 'briefcase', 
+                description: 'Menganalisis definisi, unsur, dan fungsi-fungsi manajemen (Planning, Organizing, Actuating, Controlling - POAC).', 
+                materi: [
+                    { 
+                        id: 'm2_1', 
+                        title: 'A. Pengertian dan Unsur Manajemen', 
+                        type: 'text', 
+                        content: 'Manajemen adalah proses perencanaan, pengorganisasian, pengarahan, dan pengendalian sumber daya untuk mencapai tujuan organisasi secara efektif dan efisien. \n\nUnsur-unsur utama manajemen (6M): Man (Manusia), Money (Uang), Material (Bahan), Machine (Mesin), Method (Metode), dan Market (Pasar).' 
+                    },
+                    { 
+                        id: 'm2_2', 
+                        title: 'B. Empat Fungsi Manajemen (POAC)', 
+                        type: 'text', 
+                        content: '1. Planning (Perencanaan): Menetapkan tujuan dan cara mencapainya. \n2. Organizing (Pengorganisasian): Menentukan struktur, tugas, dan alokasi sumber daya. \n3. Actuating (Pelaksanaan): Menggerakkan bawahan agar bekerja. \n4. Controlling (Pengawasan): Mengukur kinerja dan mengambil tindakan korektif.' 
+                    },
+                    { 
+                        id: 'm2_3', 
+                        title: 'C. Video Simulasi: Gaya Kepemimpinan', 
+                        type: 'video', 
+                        content: 'Simulasi video pembelajaran yang mendiskusikan berbagai gaya kepemimpinan (Otokratis, Demokratis, Laissez-Faire) dan bagaimana memilih yang paling efektif di lingkungan kerja modern. [Image of Gaya Kepemimpinan]' 
+                    }
+                ] 
+            },
+            { 
+                id: 'bab3', 
+                title: 'Bab 3: Badan Usaha dalam Perekonomian', 
+                icon: 'banknote', 
+                description: 'Memahami jenis-jenis badan usaha, peran BUMN/BUMD, serta struktur dan prinsip Koperasi.', 
+                materi: [
+                    { 
+                        id: 'm3_1', 
+                        title: 'A. Bentuk-bentuk Badan Usaha (Perseorangan, Firma, CV, PT)', 
+                        type: 'text', 
+                        content: 'Badan Usaha Milik Perseorangan: Modal tunggal, tanggung jawab tak terbatas.\n\nCV (Commanditaire Vennootschap): Ada sekutu aktif (pengelola) dan sekutu pasif (pemodal).\n\nPT (Perseroan Terbatas): Modal dari saham, tanggung jawab terbatas hanya sebesar modal yang disetor. [Image of Perbedaan bentuk badan usaha]' 
+                    },
+                    { 
+                        id: 'm3_2', 
+                        title: 'B. Prinsip Dasar dan Peran Koperasi', 
+                        type: 'text', 
+                        content: 'Koperasi berlandaskan asas kekeluargaan. Prinsipnya meliputi Keanggotaan bersifat sukarela dan terbuka, Pengelolaan dilakukan secara demokratis, dan Pembagian Sisa Hasil Usaha (SHU) secara adil.' 
+                    },
+                    { 
+                        id: 'm3_3', 
+                        title: 'C. Tugas Esai: Peran BUMN dan BUMD', 
+                        type: 'quiz', 
+                        content: 'Tugas Individu: Buatlah esai singkat (200-300 kata) yang menganalisis peran utama BUMN (Badan Usaha Milik Negara) dan BUMD (Badan Usaha Milik Daerah) dalam stabilitas dan pembangunan ekonomi nasional.' 
+                    }
+                ] 
+            }
+        ];
+        
+        // --- STATE & UTILITY ---
+        let currentPage = 'mataPelajaran';
+
+        // Helper function to safely escape strings for use inside single-quoted JS arguments within an HTML attribute
+        function escapeForOnclick(s) {
+            if (typeof s !== 'string') return '';
+            // Escape backslashes, then single quotes, then newlines.
+            return s.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n');
+        }
+
+        // Fungsi untuk menampilkan Modal Kustom
+        function showModal(title, message) {
+            document.getElementById('modal-title').textContent = title;
+            
+            // Perbaikan Logika: Menghapus tag yang tidak dapat dirender dan menggantinya dengan catatan.
+            let cleanMessage = message.replace(/\[(Image|Video) of [^\]]*\]/g, (match, type) => {
+                // Catatan ramah untuk mengganti tag yang tidak terrender (misalnya, gambar)
+                return `\n\n[Catatan: Konten ${type} disimulasikan di sini dan tidak ditampilkan.]`;
+            });
+            
+            // Gunakan innerHTML dan class modal-content-text untuk mendukung baris baru (\n)
+            document.getElementById('modal-message').innerHTML = `<div class="modal-content-text text-gray-800">${cleanMessage}</div>`;
+            document.getElementById('modal-backdrop').classList.remove('hidden');
+            const modal = document.getElementById('custom-modal');
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            modal.querySelector('div').classList.remove('scale-95'); // Reset scale transition
+        }
+
+        // Fungsi untuk menutup Modal Kustom
+        function closeModal() {
+            document.getElementById('modal-backdrop').classList.add('hidden');
+            const modal = document.getElementById('custom-modal');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            modal.querySelector('div').classList.add('scale-95'); // Apply scale transition
+        }
+
+        // PERBAIKAN STABILITAS IKON: Mengambil SVG langsung dari objek Lucide, dengan fallback yang lebih baik.
+        function getIcon(name, classes = 'w-6 h-6') {
+            // Check if the lucide library is loaded and the icon exists
+            if (typeof lucide !== 'undefined' && lucide.icons && lucide.icons[name]) {
+                try {
+                    // Return the complete SVG string
+                    return lucide.icons[name].toSvg({ class: classes });
+                } catch (e) {
+                    // Fallback in case the toSvg conversion fails
+                    console.error(`Gagal mengkonversi ikon ${name} ke SVG:`, e);
+                }
+            }
+            // Fallback: Return a simple visual placeholder element (e.g., a circle with a question mark)
+            // Note: We use an inline style to ensure the element is square even if classes are sparse
+            const style = `width: 100%; height: 100%;`;
+            return `<div class="${classes} flex items-center justify-center bg-gray-300 text-gray-700 rounded-full text-xs font-semibold" style="${style}">?</div>`;
+        }
+        
+        function toggleMobileMenu() {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+            document.getElementById('menu-icon').classList.toggle('hidden');
+            document.getElementById('close-icon').classList.toggle('hidden');
+        }
+        document.getElementById('mobile-menu-button').addEventListener('click', toggleMobileMenu);
+
+        // --- NAVIGATION & RENDERING ---
+
+        function navigate(pageId, data = null) {
+            currentPage = pageId;
+            const contentArea = document.getElementById('content-area');
+            contentArea.innerHTML = '';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            switch (pageId) {
+                case 'mataPelajaran':
+                    contentArea.innerHTML = renderMataPelajaran();
+                    break;
+                case 'babDetail':
+                    contentArea.innerHTML = renderBabDetail(data);
+                    break;
+                case 'admin':
+                    contentArea.innerHTML = renderAdmin();
+                    break;
+                default:
+                    contentArea.innerHTML = '<h1>404 Halaman Tidak Ditemukan</h1>';
+                    break;
+            }
+            
+            // PENTING: Panggil setelah konten baru ditambahkan agar Lucide memproses ikon (misalnya, yang ada di header)
+            if (typeof lucide !== 'undefined' && lucide.createIcons) {
+                 lucide.createIcons();
+            }
+
+            updateActiveNavLink(pageId);
+        }
+
+        function updateActiveNavLink(activePage) {
+            document.querySelectorAll('.nav-link').forEach(link => {
+                const linkPage = link.getAttribute('data-page');
+                if (linkPage === activePage) {
+                    link.classList.add('active');
+                    link.classList.remove('text-gray-700');
+                } else {
+                    link.classList.remove('active');
+                    link.classList.add('text-gray-700');
+                }
+            });
+        }
+
+        // --- RENDER FUNCTIONS ---
+
+        function renderMataPelajaran() {
+            return `
+                <div class="text-center mb-10">
+                    <h1 class="text-4xl font-extrabold text-gray-800">${MATA_PELAJARAN}</h1>
+                    <p class="text-lg text-gray-500 mt-2">Pilih bab di bawah untuk memulai.</p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    ${CONTENT_DATA.map(bab => `
+                        <div class="bg-white p-6 rounded-xl border shadow-md hover:shadow-xl transition-all">
+                            <div class="flex items-start">
+                                <div class="p-3 bg-indigo-600 rounded-full text-white mr-4 flex-shrink-0">
+                                    ${getIcon(bab.icon, 'w-6 h-6')}
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-bold text-gray-800">${bab.title}</h3>
+                                    <p class="text-gray-500 mt-1 text-sm">${bab.description}</p>
+                                </div>
+                            </div>
+                            <!-- Tombol dengan warna yang lebih menonjol -->
+                            <button onclick="navigate('babDetail', '${bab.id}')" class="mt-4 w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 font-medium shadow-md transition-colors">
+                                Buka Bab
+                            </button>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function renderBabDetail(babId) {
+            const bab = CONTENT_DATA.find(b => b.id === babId);
+            if (!bab) return '<h1>Bab Tidak Ditemukan</h1>';
+            
+            // Helper untuk mendapatkan ikon berdasarkan tipe
+            function getMaterialIcon(type) {
+                switch (type) {
+                    case 'video': return 'youtube';
+                    case 'quiz': return 'award';
+                    case 'text': return 'file-text';
+                    default: return 'help-circle';
+                }
+            }
+
+            return `
+                <button onclick="navigate('mataPelajaran')" class="text-indigo-600 hover:text-indigo-800 mb-6 flex items-center font-medium">
+                    ${getIcon('chevron-left', 'w-4 h-4 mr-1')} Kembali ke Daftar Bab
+                </button>
+
+                <div class="bg-white p-6 rounded-xl border mb-8 border-l-4 border-indigo-600 shadow-md">
+                    <h1 class="text-3xl font-bold text-gray-800 mb-2">${bab.title}</h1>
+                    <p class="text-gray-500">${bab.description}</p>
+                </div>
+
+                <h2 class="text-2xl font-bold text-gray-700 mb-4">Daftar Materi</h2>
+                
+                <div class="space-y-4">
+                    ${bab.materi.map(m => `
+                        <div class="bg-white p-4 rounded-lg border-l-4 border-green-600 flex justify-between items-center shadow hover:shadow-lg transition-shadow">
+                            <div class="flex items-center">
+                                <!-- Ikon Materi dengan latar belakang kontras -->
+                                <div class="p-2 bg-indigo-50 rounded-full mr-3 text-indigo-600">
+                                    ${getIcon(getMaterialIcon(m.type), 'w-5 h-5')}
+                                </div>
+                                <div>
+                                    <p class="text-lg font-medium text-gray-800">${m.title}</p>
+                                    <span class="text-sm text-gray-500">${m.type.toUpperCase()}</span>
+                                </div>
+                            </div>
+                            <!-- PENTING: Menggunakan escapeForOnclick untuk mencegah SyntaxError -->
+                            <button onclick="showModal('${escapeForOnclick(m.title)}', '${escapeForOnclick(m.content)}')" class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-green-700 transition-colors shadow-sm">
+                                Lihat Materi
+                            </button>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function renderAdmin() {
+            return `
+                <div class="bg-white p-6 md:p-10 rounded-xl shadow-lg border">
+                    <h1 class="text-3xl font-bold text-indigo-700 mb-6 border-b pb-2">Pengaturan Admin Sederhana</h1>
+                    
+                    <p class="text-lg text-gray-600 mb-8">Area ini disimulasikan untuk mengelola konten.</p>
+
+                    <div class="space-y-4">
+                        <button onclick="showModal('Kelola Bab', 'Anda akan masuk ke editor Bab.')" class="w-full bg-indigo-100 text-indigo-700 py-3 rounded-lg font-medium hover:bg-indigo-200 flex items-center justify-center transition-colors">
+                            ${getIcon('layers', 'w-5 h-5 mr-2')} Kelola Bab (${CONTENT_DATA.length} Aktif)
+                        </button>
+                        <button onclick="showModal('Upload Materi', 'Modul upload media dibuka.')" class="w-full bg-green-100 text-green-700 py-3 rounded-lg font-medium hover:bg-green-200 flex items-center justify-center transition-colors">
+                            ${getIcon('upload', 'w-5 h-5 mr-2')} Unggah Konten Baru
+                        </button>
+                        <button onclick="showModal('Laporan Progres', 'Laporan analitik sedang dibuat.')" class="w-full bg-yellow-100 text-yellow-700 py-3 rounded-lg font-medium hover:bg-yellow-200 flex items-center justify-center transition-colors">
+                            ${getIcon('bar-chart-2', 'w-5 h-5 mr-2')} Lihat Laporan Progres
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+
+        // --- INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', () => {
+            navigate('mataPelajaran');
+            // Pastikan ikon awal (menu/close) juga diproses saat DOMContentLoaded
+            if (typeof lucide !== 'undefined' && lucide.createIcons) {
+                 lucide.createIcons();
+            }
+        });
+    </script>
+
+</body>
+</html>
